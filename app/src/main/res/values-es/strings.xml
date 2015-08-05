@@ -3,4 +3,5 @@
 
     <string name="hello_world">Hola mundo!</string>
     <string name="action_settings">Configuración</string>
+    <string name="title_activity_match_details">Detalles del partido</string>
 </resources>

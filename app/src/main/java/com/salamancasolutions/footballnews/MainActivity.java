@@ -1,49 +1,63 @@
 package com.salamancasolutions.footballnews;
 
+import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 
 
 public class MainActivity extends ActionBarActivity {
+
+    private ListView mainList;
+    private MainListAdapter mainListAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        String[] results = {"Wilsterman 1 - Aurora 1",
-                "River Plate 1 - Boca Juniors 1",
-                "River Plate 1 - Boca Juniors 1",
-                "River Plate 1 - Boca Juniors 1",
-                "River Plate 1 - Boca Juniors 1",
-                "River Plate 1 - Boca Juniors 1",
-                "River Plate 1 - Boca Juniors 1",
-                "River Plate 1 - Boca Juniors 1",
-                "Wilsterman 1 - Aurora 1",
-                "River Plate 1 - Boca Juniors 1",
-                "River Plate 1 - Boca Juniors 1",
-                "River Plate 1 - Boca Juniors 1",
-                "River Plate 1 - Boca Juniors 1",
-                "River Plate 1 - Boca Juniors 1",
-                "River Plate 1 - Boca Juniors 1",
-                "River Plate 1 - Boca Juniors 1"};
 
-        ArrayList<String> resultList = new ArrayList<>(Arrays.asList(results));
+        ArrayList<Match> matches = new ArrayList<Match>();
 
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this,
-                R.layout.main_list_item,
-                R.id.text_item_list,
-                resultList);
+        matches.add(new Match("1", 0, "Barcelona", "0", "Valencia CF", "4", 0, new Date(), "FINISHED"));
+        matches.add(new Match("2", 0, "Real Madrid", "1", "Atletico Madrid", "2", 0, new Date(), "FINISHED"));
+        matches.add(new Match("3", 0, "Real Betis", "1", "Sporting Gijón", "0", 0, new Date(), "FINISHED"));
+        matches.add(new Match("4", 0, "Rayo Vallecano", "0", "Granada CF", "0", 0, new Date(), "FINISHED"));
+        matches.add(new Match("5", 0, "Athletic Bilbao", "2", "FC Málaga", "1", 0, new Date(), "FINISHED"));
+        matches.add(new Match("6", 0, "Barcelona", "0", "Valencia CF", "4", 0, new Date(), "FINISHED"));
+        matches.add(new Match("7", 0, "Real Madrid", "1", "Atletico Madrid", "2", 0, new Date(), "FINISHED"));
+        matches.add(new Match("8", 0, "Real Betis", "1", "Sporting Gijón", "0", 0, new Date(), "FINISHED"));
+        matches.add(new Match("9", 0, "Rayo Vallecano", "0", "Granada CF", "0", 0, new Date(), "FINISHED"));
+        matches.add(new Match("10", 0, "Athletic Bilbao", "2", "FC Málaga", "1", 0, new Date(), "FINISHED"));
 
-        ListView mainList = (ListView)findViewById(R.id.main_list);
-        mainList.setAdapter(arrayAdapter);
+        mainListAdapter = new MainListAdapter(this, matches);
+
+        mainList = (ListView)findViewById(R.id.main_list);
+        mainList.setAdapter(mainListAdapter);
+
+
+        mainList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Intent intent = new Intent(getBaseContext(), MatchDetailsActivity.class);
+                Match item = (Match)mainListAdapter.getItem(i);
+                intent.putExtra("IDMATCH", item.getIdentifier());
+                startActivity(intent);
+
+            }
+        });
+
+
+
     }
 
     @Override
