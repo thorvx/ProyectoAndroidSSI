@@ -1,14 +1,18 @@
 package com.salamancasolutions.footballnews;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+
+import org.json.JSONException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,6 +23,7 @@ public class MainActivity extends ActionBarActivity {
 
     private ListView mainList;
     private MainListAdapter mainListAdapter;
+    private static final String LOG_TAG = Utility.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,14 +54,15 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Intent intent = new Intent(getBaseContext(), MatchDetailsActivity.class);
-                Match item = (Match)mainListAdapter.getItem(i);
+                Match item = (Match) mainListAdapter.getItem(i);
                 intent.putExtra("IDMATCH", item.getIdentifier());
                 startActivity(intent);
 
             }
         });
 
-
+        GetResultTask task = new GetResultTask();
+        task.execute("81", "60");
 
     }
 
@@ -81,4 +87,32 @@ public class MainActivity extends ActionBarActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    class GetResultTask extends AsyncTask<String, Void, ArrayList<String>> {
+
+        @Override
+        protected ArrayList<String> doInBackground(String... params) {
+            if (params.length != 2)
+                return null;
+
+            String resultString = Utility.getJsonStringFromNetwork(params[0], params[1]);
+
+            try {
+                return Utility.parseFixtureJson(resultString);
+            } catch (JSONException e) {
+                Log.e(LOG_TAG, "Error parsing" + e.getMessage(), e);
+                e.printStackTrace();
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(ArrayList<String> results) {
+
+            for (String result : results) {
+                Log.d("Match", result);
+            }
+        }
+    }
+
 }
