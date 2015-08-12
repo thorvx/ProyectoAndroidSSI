@@ -33,12 +33,12 @@ public class MainActivity extends ActionBarActivity {
 
         ArrayList<Match> matches = new ArrayList<Match>();
 
-        matches.add(new Match("1", 0, "Barcelona", "0", "Valencia CF", "4", 0, new Date(), "FINISHED"));
-        matches.add(new Match("2", 0, "Real Madrid", "1", "Atletico Madrid", "2", 0, new Date(), "FINISHED"));
-        matches.add(new Match("3", 0, "Real Betis", "1", "Sporting Gijón", "0", 0, new Date(), "FINISHED"));
+        matches.add(new Match("1", 0, "FC Barcelona", "0", "Valencia CF", "4", 0, new Date(), "FINISHED"));
+        matches.add(new Match("2", 0, "Real Madrid", "1", "FC Barcelona", "2", 0, new Date(), "FINISHED"));
+        matches.add(new Match("3", 0, "Real Betis", "1", "FC Barcelona", "0", 0, new Date(), "FINISHED"));
         matches.add(new Match("4", 0, "Rayo Vallecano", "0", "Granada CF", "0", 0, new Date(), "FINISHED"));
         matches.add(new Match("5", 0, "Athletic Bilbao", "2", "FC Málaga", "1", 0, new Date(), "FINISHED"));
-        matches.add(new Match("6", 0, "Barcelona", "0", "Valencia CF", "4", 0, new Date(), "FINISHED"));
+        matches.add(new Match("6", 0, "FC Barcelona", "0", "Valencia CF", "4", 0, new Date(), "FINISHED"));
         matches.add(new Match("7", 0, "Real Madrid", "1", "Atletico Madrid", "2", 0, new Date(), "FINISHED"));
         matches.add(new Match("8", 0, "Real Betis", "1", "Sporting Gijón", "0", 0, new Date(), "FINISHED"));
         matches.add(new Match("9", 0, "Rayo Vallecano", "0", "Granada CF", "0", 0, new Date(), "FINISHED"));
@@ -61,9 +61,7 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
-        GetResultTask task = new GetResultTask();
-        task.execute("81", "60");
-
+        refreshResults();
     }
 
     @Override
@@ -71,6 +69,11 @@ public class MainActivity extends ActionBarActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
+    }
+
+    public void refreshResults(){
+        GetResultTask task = new GetResultTask();
+        task.execute("81", "60");
     }
 
     @Override
@@ -85,13 +88,18 @@ public class MainActivity extends ActionBarActivity {
             return true;
         }
 
+        if (id == R.id.action_refresh) {
+            refreshResults();
+            return true;
+        }
+
         return super.onOptionsItemSelected(item);
     }
 
-    class GetResultTask extends AsyncTask<String, Void, ArrayList<String>> {
+    class GetResultTask extends AsyncTask<String, Void, ArrayList<Match>> {
 
         @Override
-        protected ArrayList<String> doInBackground(String... params) {
+        protected ArrayList<Match> doInBackground(String... params) {
             if (params.length != 2)
                 return null;
 
@@ -107,10 +115,10 @@ public class MainActivity extends ActionBarActivity {
         }
 
         @Override
-        protected void onPostExecute(ArrayList<String> results) {
-
-            for (String result : results) {
-                Log.d("Match", result);
+        protected void onPostExecute(ArrayList<Match> results) {
+            mainListAdapter.clear();
+            for (Match result : results) {
+                mainListAdapter.add(result);
             }
         }
     }

@@ -86,9 +86,9 @@ public class Utility {
 
 
     //Parse string JSON to List
-    public static ArrayList<String> parseFixtureJson(String fixtureJson) throws JSONException {
+    public static ArrayList<Match> parseFixtureJson(String fixtureJson) throws JSONException {
         JSONObject jsonObject = new JSONObject(fixtureJson);
-        ArrayList<String> result = new ArrayList<String>();
+        ArrayList<Match> result = new ArrayList<Match>();
 
         JSONArray fixturesArray = jsonObject.getJSONArray("fixtures");
 
@@ -116,6 +116,10 @@ public class Utility {
             homeScore = resultObject.getString("goalsHomeTeam");
             awayScore = resultObject.getString("goalsAwayTeam");
 
+            Log.d("Id", fixtureId);
+            Log.d("matchDate", matchDate);
+            Log.d("status", status);
+
             try{
                 //2015-08-30T15:00:00Z
                 DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
@@ -124,8 +128,15 @@ public class Utility {
                 Log.e(LOG_TAG, "Error parsing date", e);
             }
 
-            String match = fixtureId + ", " + date.toString()  + ", " + status + ", " +  homeTeam + ", " + awayTeam + ", " + homeScore + ", " + awayScore;
-
+            Match match = new Match(fixtureId,
+                    0,
+                    homeTeam,
+                    homeScore.equalsIgnoreCase("-1")?"0":homeScore,
+                    awayTeam,
+                    awayScore.equalsIgnoreCase("-1")?"0":awayScore,
+                    0,
+                    date,
+                    status);
             result.add(match);
 
         }

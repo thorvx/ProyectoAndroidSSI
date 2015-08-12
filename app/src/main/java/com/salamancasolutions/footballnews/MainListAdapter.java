@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.text.DateFormat;
@@ -35,8 +36,19 @@ public class MainListAdapter extends ArrayAdapter {
         TextView homeScore = (TextView) convertView.findViewById(R.id.home_score);
         TextView awayScore = (TextView) convertView.findViewById(R.id.away_score);
         TextView dateMatch = (TextView) convertView.findViewById(R.id.match_date);
+        ImageView homeLogo = (ImageView) convertView.findViewById(R.id.home_logo);
+        ImageView awayLogo = (ImageView) convertView.findViewById(R.id.away_logo);
+
 
         Match match = (Match) getItem(position);
+
+        if(match.getHomeTeam().equalsIgnoreCase("FC Barcelona")){
+            homeLogo.setImageResource(R.mipmap.ic_barcelona);
+        }
+        if(match.getAwayTeam().equalsIgnoreCase("FC Barcelona")){
+            awayLogo.setImageResource(R.mipmap.ic_barcelona);
+        }
+
         homeTeam.setText(match.getHomeTeam());
         awayTeam.setText(match.getAwayTeam());
         homeScore.setText(match.getHomeScore());

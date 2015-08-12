@@ -10,7 +10,7 @@
         android:layout_height="100dp"
         android:id="@+id/image_header"
         android:src="@drawable/header_futbol"
-        android:scaleType="fitXY"/>
+        android:scaleType="center"/>
 
     <ListView
         android:id="@+id/main_list"
