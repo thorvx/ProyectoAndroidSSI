@@ -42,12 +42,8 @@ public class MainListAdapter extends ArrayAdapter {
 
         Match match = (Match) getItem(position);
 
-        if(match.getHomeTeam().equalsIgnoreCase("FC Barcelona")){
-            homeLogo.setImageResource(R.mipmap.ic_barcelona);
-        }
-        if(match.getAwayTeam().equalsIgnoreCase("FC Barcelona")){
-            awayLogo.setImageResource(R.mipmap.ic_barcelona);
-        }
+        homeLogo.setImageResource(getLogoResource(match.getHomeTeam()));
+        awayLogo.setImageResource(getLogoResource(match.getAwayTeam()));
 
         homeTeam.setText(match.getHomeTeam());
         awayTeam.setText(match.getAwayTeam());
@@ -58,4 +54,29 @@ public class MainListAdapter extends ArrayAdapter {
 
         return convertView;
     }
+
+    public int getLogoResource(String team) {
+
+        int imageResource = 0;
+
+        switch (team) {
+            case "FC Barcelona":
+                imageResource = getContext().getResources().getIdentifier("ic_barcelona","mipmap", getContext().getPackageName());
+                break;
+            case "Athletic Club":
+                imageResource = getContext().getResources().getIdentifier("ic_athletic","mipmap", getContext().getPackageName());
+                break;
+            case "Málaga CF":
+                imageResource = getContext().getResources().getIdentifier("ic_malaga","mipmap", getContext().getPackageName());
+                break;
+            case "Club Atlético de Madrid":
+                imageResource = getContext().getResources().getIdentifier("ic_atletico_m","mipmap", getContext().getPackageName());
+                break;
+            default:
+                imageResource = getContext().getResources().getIdentifier("ic_emblem","mipmap", getContext().getPackageName());
+                break;
+        }
+        return imageResource;
+    }
+
 }

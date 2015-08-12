@@ -116,10 +116,6 @@ public class Utility {
             homeScore = resultObject.getString("goalsHomeTeam");
             awayScore = resultObject.getString("goalsAwayTeam");
 
-            Log.d("Id", fixtureId);
-            Log.d("matchDate", matchDate);
-            Log.d("status", status);
-
             try{
                 //2015-08-30T15:00:00Z
                 DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
@@ -127,6 +123,8 @@ public class Utility {
             } catch (Exception e){
                 Log.e(LOG_TAG, "Error parsing date", e);
             }
+
+            Log.d(LOG_TAG, fixtureId + ", " + matchDate  + ", " + status + ", " +  homeTeam + ", " + awayTeam + ", " + homeScore + ", " + awayScore);
 
             Match match = new Match(fixtureId,
                     0,

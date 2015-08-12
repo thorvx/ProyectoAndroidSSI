@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import org.json.JSONException;
 
@@ -33,16 +34,12 @@ public class MainActivity extends ActionBarActivity {
 
         ArrayList<Match> matches = new ArrayList<Match>();
 
-        matches.add(new Match("1", 0, "FC Barcelona", "0", "Valencia CF", "4", 0, new Date(), "FINISHED"));
+/*      matches.add(new Match("1", 0, "FC Barcelona", "0", "Valencia CF", "4", 0, new Date(), "FINISHED"));
         matches.add(new Match("2", 0, "Real Madrid", "1", "FC Barcelona", "2", 0, new Date(), "FINISHED"));
         matches.add(new Match("3", 0, "Real Betis", "1", "FC Barcelona", "0", 0, new Date(), "FINISHED"));
         matches.add(new Match("4", 0, "Rayo Vallecano", "0", "Granada CF", "0", 0, new Date(), "FINISHED"));
         matches.add(new Match("5", 0, "Athletic Bilbao", "2", "FC Málaga", "1", 0, new Date(), "FINISHED"));
-        matches.add(new Match("6", 0, "FC Barcelona", "0", "Valencia CF", "4", 0, new Date(), "FINISHED"));
-        matches.add(new Match("7", 0, "Real Madrid", "1", "Atletico Madrid", "2", 0, new Date(), "FINISHED"));
-        matches.add(new Match("8", 0, "Real Betis", "1", "Sporting Gijón", "0", 0, new Date(), "FINISHED"));
-        matches.add(new Match("9", 0, "Rayo Vallecano", "0", "Granada CF", "0", 0, new Date(), "FINISHED"));
-        matches.add(new Match("10", 0, "Athletic Bilbao", "2", "FC Málaga", "1", 0, new Date(), "FINISHED"));
+        matches.add(new Match("6", 0, "FC Barcelona", "0", "Valencia CF", "4", 0, new Date(), "FINISHED"));*/
 
         mainListAdapter = new MainListAdapter(this, matches);
 
@@ -116,10 +113,17 @@ public class MainActivity extends ActionBarActivity {
 
         @Override
         protected void onPostExecute(ArrayList<Match> results) {
-            mainListAdapter.clear();
-            for (Match result : results) {
-                mainListAdapter.add(result);
+
+            if(results!=null) {
+                mainListAdapter.clear();
+                mainList.invalidate();
+                for (Match result : results) {
+                    mainListAdapter.add(result);
+                }
+            } else {
+                Toast.makeText(getBaseContext(), getBaseContext().getResources().getString(R.string.error_get_results), Toast.LENGTH_SHORT).show();
             }
+
         }
     }
 
