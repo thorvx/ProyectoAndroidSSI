@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="pref_teams_list_titles">
+        <item>FC Barcelona</item>
+        <item>Atlético Madrid</item>
+        <item>FC Málaga</item>
+    </string-array>
+    <string-array name="pref_teams_list_values">
+        <item>81</item>
+        <item>78</item>
+        <item>84</item>
+    </string-array>
+</resources>

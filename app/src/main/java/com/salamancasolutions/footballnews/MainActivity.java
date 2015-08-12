@@ -1,7 +1,9 @@
 package com.salamancasolutions.footballnews;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -34,12 +36,12 @@ public class MainActivity extends ActionBarActivity {
 
         ArrayList<Match> matches = new ArrayList<Match>();
 
-/*      matches.add(new Match("1", 0, "FC Barcelona", "0", "Valencia CF", "4", 0, new Date(), "FINISHED"));
-        matches.add(new Match("2", 0, "Real Madrid", "1", "FC Barcelona", "2", 0, new Date(), "FINISHED"));
-        matches.add(new Match("3", 0, "Real Betis", "1", "FC Barcelona", "0", 0, new Date(), "FINISHED"));
-        matches.add(new Match("4", 0, "Rayo Vallecano", "0", "Granada CF", "0", 0, new Date(), "FINISHED"));
-        matches.add(new Match("5", 0, "Athletic Bilbao", "2", "FC Málaga", "1", 0, new Date(), "FINISHED"));
-        matches.add(new Match("6", 0, "FC Barcelona", "0", "Valencia CF", "4", 0, new Date(), "FINISHED"));*/
+      matches.add(new Match("1", 0, "FC Barcelona", "0", "Athletic Club", "4", 0, new Date(), "FINISHED"));
+        matches.add(new Match("2", 0, "Málaga CF", "1", "FC Barcelona", "2", 0, new Date(), "FINISHED"));
+        matches.add(new Match("3", 0, "Club Atlético de Madrid", "1", "FC Barcelona", "0", 0, new Date(), "FINISHED"));
+        matches.add(new Match("4", 0, "FC Barcelona", "0", "Málaga CF", "0", 0, new Date(), "FINISHED"));
+        matches.add(new Match("5", 0, "Athletic Club", "2", "FC Barcelona", "1", 0, new Date(), "FINISHED"));
+        matches.add(new Match("6", 0, "FC Barcelona", "0", "Club Atlético de Madrid", "4", 0, new Date(), "FINISHED"));
 
         mainListAdapter = new MainListAdapter(this, matches);
 
@@ -58,6 +60,11 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
         refreshResults();
     }
 
@@ -69,8 +76,12 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public void refreshResults(){
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        String teamId = prefs.getString("favorite_team", "81");
+
         GetResultTask task = new GetResultTask();
-        task.execute("81", "60");
+        task.execute(teamId, "60");
     }
 
     @Override
@@ -82,6 +93,8 @@ public class MainActivity extends ActionBarActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent settingsIntent = new Intent(this, SettingsActivity.class);
+            startActivity(settingsIntent);
             return true;
         }
 
