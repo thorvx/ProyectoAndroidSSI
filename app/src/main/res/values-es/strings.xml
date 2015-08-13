@@ -7,5 +7,9 @@
     <string name="action_refresh">Actualizar</string>
     <string name="error_get_results">No se pudo obtener resultados</string>
     <string name="pref_header_general">General</string>
-    <string name="pref_title_team_favorite">Favorite team</string>
+    <string name="pref_title_team_favorite">Equipo favorito</string>
+    <string name="title_activity_settings">Configuración</string>
+    <string name="pref_title_ndays">Future days</string>
+    <string name="pref_title_pdays">Past days</string>
+    <string name="pref_summary_pdays">Number of days past</string>
 </resources>

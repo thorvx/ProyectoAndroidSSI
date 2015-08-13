@@ -23,24 +23,28 @@ import java.util.Date;
 public class Utility {
     private static final String LOG_TAG = Utility.class.getSimpleName();
 
-    public static String getJsonStringFromNetwork(String team, String days) {
+    public static String getJsonStringFromNetwork(String team, String startDate, String endDate) {
         Log.d(LOG_TAG, "Starting network connection");
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
 
-        String timeFrame = "n" + days; // n30 next 30 days, p30 previous 30 days
 
         try {
             final String FIXTURE_BASE_URL = "http://api.football-data.org/alpha/teams/";
             final String FIXTURE_PATH = "fixtures";
-            final String TIME_FRAME_PARAMETER = "timeFrame";
+            final String TIME_FRAME_PARAMETER_START = "timeFrameStart";
+            final String TIME_FRAME_PARAMETER_END = "timeFrameEnd";
 
             Uri builtUri = Uri.parse(FIXTURE_BASE_URL).buildUpon()
                     .appendPath(team)
                     .appendPath(FIXTURE_PATH)
-                    .appendQueryParameter(TIME_FRAME_PARAMETER, timeFrame)
+                    .appendQueryParameter(TIME_FRAME_PARAMETER_START, startDate)
+                    .appendQueryParameter(TIME_FRAME_PARAMETER_END, endDate)
                     .build();
             URL url = new URL(builtUri.toString());
+
+            Log.d("API Url", builtUri.toString());
+            //http://api.football-data.org/alpha/teams/81/fixtures?timeFrameStart=2015-03-01&timeFrameEnd=2015-09-05
             //http://api.football-data.org/alpha/teams/81/fixtures?timeFrame=n30
 
             urlConnection = (HttpURLConnection)url.openConnection();
@@ -91,6 +95,9 @@ public class Utility {
         ArrayList<Match> result = new ArrayList<Match>();
 
         JSONArray fixturesArray = jsonObject.getJSONArray("fixtures");
+        String count = jsonObject.getString("count");
+
+        Log.d("Count results", count);
 
         for (int i = 0; i < fixturesArray.length(); i++) {
             String selfLink;

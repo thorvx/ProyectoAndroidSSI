@@ -12,6 +12,21 @@
             android:negativeButtonText="@null"
             android:positiveButtonText="@null" />
 
+        <EditTextPreference
+            android:key="next_days"
+            android:title="@string/pref_title_ndays"
+            android:summary="@string/pref_summary_ndays"
+            android:inputType="number"
+           />
+
+        <EditTextPreference
+            android:key="past_days"
+            android:title="@string/pref_title_pdays"
+            android:summary="@string/pref_summary_pdays"
+            android:inputType="number"
+            />
+
+
         </PreferenceCategory>
 
 </PreferenceScreen>

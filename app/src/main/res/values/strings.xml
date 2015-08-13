@@ -6,7 +6,11 @@
     <string name="title_activity_match_details">Match Detail</string>
     <string name="action_refresh">Refresh</string>
     <string name="error_get_results">Failed to get results</string>
-    <string name="title_activity_settings">SettingsActivity</string>
+    <string name="title_activity_settings">Settings</string>
     <string name="pref_header_general">General</string>
     <string name="pref_title_team_favorite">Favorite team</string>
+    <string name="pref_title_ndays">Future days</string>
+    <string name="pref_title_pdays">Past days</string>
+    <string name="pref_summary_ndays">Number of days forward</string>
+    <string name="pref_summary_pdays">Number of days past</string>
 </resources>

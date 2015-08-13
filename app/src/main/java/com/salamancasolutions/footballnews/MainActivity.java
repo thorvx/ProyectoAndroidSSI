@@ -17,9 +17,13 @@ import android.widget.Toast;
 
 import org.json.JSONException;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -36,12 +40,8 @@ public class MainActivity extends ActionBarActivity {
 
         ArrayList<Match> matches = new ArrayList<Match>();
 
-      matches.add(new Match("1", 0, "FC Barcelona", "0", "Athletic Club", "4", 0, new Date(), "FINISHED"));
-        matches.add(new Match("2", 0, "Málaga CF", "1", "FC Barcelona", "2", 0, new Date(), "FINISHED"));
-        matches.add(new Match("3", 0, "Club Atlético de Madrid", "1", "FC Barcelona", "0", 0, new Date(), "FINISHED"));
-        matches.add(new Match("4", 0, "FC Barcelona", "0", "Málaga CF", "0", 0, new Date(), "FINISHED"));
-        matches.add(new Match("5", 0, "Athletic Club", "2", "FC Barcelona", "1", 0, new Date(), "FINISHED"));
-        matches.add(new Match("6", 0, "FC Barcelona", "0", "Club Atlético de Madrid", "4", 0, new Date(), "FINISHED"));
+        matches.add(new Match("1", 0, "Team 1", "0", "Team 2", "0", 0, new Date(), "TIMED"));
+
 
         mainListAdapter = new MainListAdapter(this, matches);
 
@@ -76,12 +76,25 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public void refreshResults(){
-
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         String teamId = prefs.getString("favorite_team", "81");
+        int futureDays = Integer.parseInt(prefs.getString("next_days", "10"));
+        int pastDays = Integer.parseInt(prefs.getString("past_days", "10"));
+
+        Date today = new Date();
+        Calendar cal = new GregorianCalendar();
+        cal.setTime(today);
+        cal.add(Calendar.DAY_OF_MONTH, futureDays);
+        Date futureDay = cal.getTime();
+        cal.add(Calendar.DAY_OF_MONTH, futureDays * -1);
+        cal.add(Calendar.DAY_OF_MONTH, pastDays * -1);
+        Date pastDay = cal.getTime();
+
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 
         GetResultTask task = new GetResultTask();
-        task.execute(teamId, "60");
+        task.execute(teamId, df.format(pastDay), df.format(futureDay));
+
     }
 
     @Override
@@ -110,18 +123,21 @@ public class MainActivity extends ActionBarActivity {
 
         @Override
         protected ArrayList<Match> doInBackground(String... params) {
-            if (params.length != 2)
+            if (params.length != 3)
                 return null;
 
-            String resultString = Utility.getJsonStringFromNetwork(params[0], params[1]);
+            String resultString = Utility.getJsonStringFromNetwork(params[0], params[1], params[2]);
 
             try {
+
                 return Utility.parseFixtureJson(resultString);
+
             } catch (JSONException e) {
                 Log.e(LOG_TAG, "Error parsing" + e.getMessage(), e);
                 e.printStackTrace();
                 return null;
             }
+
         }
 
         @Override
