@@ -1,7 +1,9 @@
 package com.salamancasolutions.footballnews;
 
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
@@ -15,9 +17,13 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.salamancasolutions.footballnews.data.FootballNewsDbHelper;
+import com.salamancasolutions.footballnews.data.MatchColumns;
+
 import org.json.JSONException;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,17 +37,14 @@ public class MainActivity extends ActionBarActivity {
     private ListView mainList;
     private MainListAdapter mainListAdapter;
     private static final String LOG_TAG = Utility.class.getSimpleName();
+    private String teamId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         ArrayList<Match> matches = new ArrayList<Match>();
-
-        matches.add(new Match("1", 0, "Team 1", "0", "Team 2", "0", 0, new Date(), "TIMED"));
-
 
         mainListAdapter = new MainListAdapter(this, matches);
 
@@ -77,7 +80,7 @@ public class MainActivity extends ActionBarActivity {
 
     public void refreshResults(){
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-        String teamId = prefs.getString("favorite_team", "81");
+        teamId = prefs.getString("favorite_team", "81");
         int futureDays = Integer.parseInt(prefs.getString("next_days", "10"));
         int pastDays = Integer.parseInt(prefs.getString("past_days", "10"));
 
@@ -91,6 +94,8 @@ public class MainActivity extends ActionBarActivity {
         Date pastDay = cal.getTime();
 
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+
+        loadResultsList(teamId);
 
         GetResultTask task = new GetResultTask();
         task.execute(teamId, df.format(pastDay), df.format(futureDay));
@@ -144,6 +149,13 @@ public class MainActivity extends ActionBarActivity {
         protected void onPostExecute(ArrayList<Match> results) {
 
             if(results!=null) {
+
+                if(!existsLocalData(teamId)){
+                    saveData(results, teamId);
+                } else {
+                    updateData(results, teamId);
+                }
+
                 mainListAdapter.clear();
                 mainList.invalidate();
                 for (Match result : results) {
@@ -154,6 +166,82 @@ public class MainActivity extends ActionBarActivity {
             }
 
         }
+    }
+
+    private void updateData(ArrayList<Match> results, String teamId) {
+    }
+
+
+    private void saveData(ArrayList<Match> results, String teamId) {
+
+        DateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+
+        for (Match result : results) {
+            ContentValues matchValues = new ContentValues();
+            matchValues.put(MatchColumns.COLUMN_IDENTIFIER, result.getIdentifier());
+            matchValues.put(MatchColumns.COLUMN_HOME_TEAM, result.getHomeTeam());
+            matchValues.put(MatchColumns.COLUMN_HOME_SCORE, result.getHomeScore());
+            matchValues.put(MatchColumns.COLUMN_AWAY_TEAM, result.getAwayTeam());
+            matchValues.put(MatchColumns.COLUMN_AWAY_SCORE, result.getAwayScore());
+            matchValues.put(MatchColumns.COLUMN_MATCH_STATUS, result.getMatchStatus());
+            matchValues.put(MatchColumns.COLUMN_MATCH_DATE, df.format(result.getMatchDate()));
+            matchValues.put(MatchColumns.COLUMN_TEAM_ID, teamId);
+
+            this.getContentResolver().insert(MatchColumns.CONTENT_URI,matchValues);
+
+        }
+
+    }
+
+    private boolean existsLocalData(String team) {
+
+        Cursor cursor = this.getContentResolver().query(
+                MatchColumns.CONTENT_URI,
+                null,
+                MatchColumns.COLUMN_TEAM_ID + " = " + team,
+                null,
+                null);
+
+        if(cursor.moveToFirst()){
+            return true;
+        } else {
+            return false;
+        }
+
+    }
+
+    public void loadResultsList(String teamId){
+
+        mainListAdapter.clear();
+        mainList.invalidate();
+
+        Cursor cursor = this.getContentResolver().query(
+                MatchColumns.CONTENT_URI,
+                null,
+                MatchColumns.COLUMN_TEAM_ID + " = " + teamId,
+                null,
+                null);
+
+        while (cursor.moveToNext()) {
+
+            mainListAdapter.add(new Match(cursor.getString(1), 0, cursor.getString(2), cursor.getString(4), cursor.getString(3), cursor.getString(5), 0, toFormatedDate(cursor.getString(6)), cursor.getString(7)));
+
+        }
+
+    }
+
+
+    public Date toFormatedDate(String s){
+
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        Date res = null;
+        try {
+
+            res = formatter.parse(s);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return res;
     }
 
 }
