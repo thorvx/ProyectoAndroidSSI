@@ -34,6 +34,13 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.salamancasolutions.footballnews.MainActivity" />
         </activity>
+
+        <provider
+            android:name=".data.FootballNewsContentProvider"
+            android:authorities="com.salamancasolutions.footballnews"
+            android:enabled="true"
+            android:exported="true" >
+        </provider>
     </application>
 
 </manifest>
