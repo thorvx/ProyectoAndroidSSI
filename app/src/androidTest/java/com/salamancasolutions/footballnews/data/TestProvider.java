@@ -132,5 +132,12 @@ public class TestProvider extends AndroidTestCase {
         cursor.close();
     }
 
+    public void testInsert() {
+
+    }
+
+    public void testDelete() {
+
+    }
 
 }

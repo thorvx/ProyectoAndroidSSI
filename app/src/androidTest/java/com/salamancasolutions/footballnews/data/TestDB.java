@@ -96,7 +96,7 @@ public class TestDB extends AndroidTestCase {
 
         Log.d("Insert id:", String.valueOf(resultRowId));
 
-        assertFalse("Error: Insert record failed", resultRowId != -1);
+        assertTrue("Error: Insert record failed", resultRowId != -1);
 
         Cursor resultCursor = db.query(
                 MatchColumns.TABLE_NAME,
@@ -134,6 +134,64 @@ public class TestDB extends AndroidTestCase {
 
         resultCursor.close();
         dbHelper.close();
+    }
+
+    public void testDeleteTable() {
+        FootballNewsDbHelper dbHelper = new FootballNewsDbHelper(mContext);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+
+        ContentValues matchValues = new ContentValues();
+
+        matchValues.put(MatchColumns.COLUMN_IDENTIFIER, "13434");
+        matchValues.put(MatchColumns.COLUMN_HOME_TEAM, "Team1");
+        matchValues.put(MatchColumns.COLUMN_HOME_SCORE, 1);
+        matchValues.put(MatchColumns.COLUMN_AWAY_TEAM, "Team2");
+        matchValues.put(MatchColumns.COLUMN_AWAY_SCORE, 2);
+        matchValues.put(MatchColumns.COLUMN_MATCH_STATUS, "FINISHED");
+        matchValues.put(MatchColumns.COLUMN_MATCH_DATE, "10/09/2015 15:00:00");
+        matchValues.put(MatchColumns.COLUMN_TEAM_ID, 81);
+
+        long resultRowId = db.insert(MatchColumns.TABLE_NAME, null, matchValues);
+
+
+        String[] selectionArgs = new String[]{"81"};
+
+        int res = db.delete(MatchColumns.TABLE_NAME, MatchColumns.COLUMN_TEAM_ID + "= ?", selectionArgs);
+
+        Log.d("Count delete by team_id", String.valueOf(res));
+        assertTrue("Error: Deleting by team_id", res > 0);
+
+    }
+
+    public void testUpdateTable() {
+        FootballNewsDbHelper dbHelper = new FootballNewsDbHelper(mContext);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+
+        ContentValues matchValues = new ContentValues();
+
+        matchValues.put(MatchColumns.COLUMN_IDENTIFIER, "13434");
+        matchValues.put(MatchColumns.COLUMN_HOME_TEAM, "Team1");
+        matchValues.put(MatchColumns.COLUMN_HOME_SCORE, 1);
+        matchValues.put(MatchColumns.COLUMN_AWAY_TEAM, "Team2");
+        matchValues.put(MatchColumns.COLUMN_AWAY_SCORE, 2);
+        matchValues.put(MatchColumns.COLUMN_MATCH_STATUS, "FINISHED");
+        matchValues.put(MatchColumns.COLUMN_MATCH_DATE, "10/09/2015 15:00:00");
+        matchValues.put(MatchColumns.COLUMN_TEAM_ID, 81);
+
+        long resultRowId = db.insert(MatchColumns.TABLE_NAME, null, matchValues);
+
+        ContentValues newValues = new ContentValues(matchValues);
+        newValues.put(MatchColumns.COLUMN_MATCH_STATUS, "PLAYING");
+
+        String[] selectionArgs = new String[]{String.valueOf(resultRowId)};
+
+        int res = db.update(MatchColumns.TABLE_NAME, newValues, MatchColumns._ID + "= ?", selectionArgs);
+
+        Log.d("Count update by _id", String.valueOf(res));
+
+        assertTrue("Error: update by _id", res > 0);
     }
 
 
