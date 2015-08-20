@@ -1,9 +1,11 @@
 package com.salamancasolutions.footballnews;
 
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
@@ -38,6 +40,7 @@ public class MainActivity extends ActionBarActivity {
     private MainListAdapter mainListAdapter;
     private static final String LOG_TAG = Utility.class.getSimpleName();
     private String teamId;
+    private DateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,12 +96,10 @@ public class MainActivity extends ActionBarActivity {
         cal.add(Calendar.DAY_OF_MONTH, pastDays * -1);
         Date pastDay = cal.getTime();
 
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-
         loadResultsList(teamId);
-
+        DateFormat dfapi = new SimpleDateFormat("yyyy-MM-dd");
         GetResultTask task = new GetResultTask();
-        task.execute(teamId, df.format(pastDay), df.format(futureDay));
+        task.execute(teamId, dfapi.format(pastDay), dfapi.format(futureDay));
 
     }
 
@@ -153,7 +154,9 @@ public class MainActivity extends ActionBarActivity {
                 if(!existsLocalData(teamId)){
                     saveData(results, teamId);
                 } else {
-                    updateData(results, teamId);
+                    deleteData(teamId);
+                    saveData(results, teamId);
+                    //updateData(results, teamId);
                 }
 
                 mainListAdapter.clear();
@@ -169,12 +172,77 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void updateData(ArrayList<Match> results, String teamId) {
+
+        for (Match result : results) {
+
+            if(existsMatch(result.getIdentifier())){
+                updateMatch(result);
+            } else {
+                ContentValues matchValues = new ContentValues();
+                matchValues.put(MatchColumns.COLUMN_IDENTIFIER, result.getIdentifier());
+                matchValues.put(MatchColumns.COLUMN_HOME_TEAM, result.getHomeTeam());
+                matchValues.put(MatchColumns.COLUMN_HOME_SCORE, result.getHomeScore());
+                matchValues.put(MatchColumns.COLUMN_AWAY_TEAM, result.getAwayTeam());
+                matchValues.put(MatchColumns.COLUMN_AWAY_SCORE, result.getAwayScore());
+                matchValues.put(MatchColumns.COLUMN_MATCH_STATUS, result.getMatchStatus());
+                matchValues.put(MatchColumns.COLUMN_MATCH_DATE, df.format(result.getMatchDate()));
+                matchValues.put(MatchColumns.COLUMN_TEAM_ID, teamId);
+
+                Uri res = this.getContentResolver().insert(MatchColumns.CONTENT_URI,matchValues);
+                long resultRowId = ContentUris.parseId(res);
+
+                if(resultRowId>0) Log.d("Match insert", result.getIdentifier());
+                else Log.d("Match not insert", result.getIdentifier());
+            }
+        }
+
+    }
+
+    private void deleteData(String teamId) {
+
+        int res = this.getContentResolver().delete(MatchColumns.CONTENT_URI, MatchColumns.COLUMN_TEAM_ID + "=" + teamId, null);
+
+        if(res>0) Log.d("Matchs deleted", String.valueOf(res));
+        else Log.d("Matchs not deleted",  String.valueOf(res));
+
+    }
+
+    private void updateMatch(Match result) {
+
+        ContentValues matchValues = new ContentValues();
+        matchValues.put(MatchColumns.COLUMN_HOME_TEAM, result.getHomeTeam());
+        matchValues.put(MatchColumns.COLUMN_HOME_SCORE, result.getHomeScore());
+        matchValues.put(MatchColumns.COLUMN_AWAY_TEAM, result.getAwayTeam());
+        matchValues.put(MatchColumns.COLUMN_AWAY_SCORE, result.getAwayScore());
+        matchValues.put(MatchColumns.COLUMN_MATCH_STATUS, result.getMatchStatus());
+        matchValues.put(MatchColumns.COLUMN_MATCH_DATE, df.format(result.getMatchDate()));
+        matchValues.put(MatchColumns.COLUMN_TEAM_ID, teamId);
+
+        int res = this.getContentResolver().update(MatchColumns.CONTENT_URI, matchValues, MatchColumns.COLUMN_IDENTIFIER + "=" + result.getIdentifier(), null );
+        if(res>0) Log.d("Match updated", result.getIdentifier());
+        else Log.d("Match not updated", result.getIdentifier());
+
+    }
+
+    private boolean existsMatch(String identifier) {
+
+        Cursor cursor = this.getContentResolver().query(
+                MatchColumns.CONTENT_URI,
+                null,
+                MatchColumns.COLUMN_IDENTIFIER + "=" + identifier,
+                null,
+                null);
+
+        if(cursor.moveToFirst()){
+            return true;
+        } else {
+            return false;
+        }
+
     }
 
 
     private void saveData(ArrayList<Match> results, String teamId) {
-
-        DateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 
         for (Match result : results) {
             ContentValues matchValues = new ContentValues();
@@ -230,14 +298,11 @@ public class MainActivity extends ActionBarActivity {
 
     }
 
-
     public Date toFormatedDate(String s){
-
-        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
         Date res = null;
         try {
 
-            res = formatter.parse(s);
+            res = df.parse(s);
         } catch (ParseException e) {
             e.printStackTrace();
         }
