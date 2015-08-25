@@ -44,11 +44,11 @@ public class MainActivity extends ActionBarActivity {
 
     private ListView mainList;
     private MainListAdapter mainListAdapter;
-    private static final String LOG_TAG = Utility.class.getSimpleName();
+    private static final String LOG_TAG = MainActivity.class.getSimpleName();
     private String teamId;
     private DateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-    private int futureDays = 0;
-    private int pastDays = 0;
+    private int futureDays;
+    private int pastDays;
     private ServiceReceiver receiver;
 
     @Override
@@ -76,20 +76,19 @@ public class MainActivity extends ActionBarActivity {
         });
 
 
-        refreshResults();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        teamId = prefs.getString("favorite_team", "81");
+        futureDays = Integer.parseInt(prefs.getString("next_days", "10"));
+        pastDays = Integer.parseInt(prefs.getString("past_days", "10"));
         loadResultsList();
+
+        refreshResults();
 
         IntentFilter filter = new IntentFilter(ServiceReceiver.PROCESS_RESPONSE);
         filter.addCategory(Intent.CATEGORY_DEFAULT);
         receiver = new ServiceReceiver();
         registerReceiver(receiver, filter);
 
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        //refreshResults();
     }
 
     @Override
@@ -101,12 +100,12 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         String newTeamId = prefs.getString("favorite_team", "81");
         int newFutureDays = Integer.parseInt(prefs.getString("next_days", "10"));
         int newPastDays = Integer.parseInt(prefs.getString("past_days", "10"));
 
-        if(!teamId.equalsIgnoreCase(newTeamId) || newFutureDays!= futureDays || newPastDays!=pastDays){
+        if(!teamId.equalsIgnoreCase(newTeamId) || futureDays != newFutureDays || pastDays != newPastDays){
             refreshResults();
         }
     }
@@ -119,7 +118,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public void refreshResults(){
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         teamId = prefs.getString("favorite_team", "81");
         futureDays = Integer.parseInt(prefs.getString("next_days", "10"));
         pastDays = Integer.parseInt(prefs.getString("past_days", "10"));

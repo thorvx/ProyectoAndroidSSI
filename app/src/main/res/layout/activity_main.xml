@@ -16,7 +16,7 @@
         android:id="@+id/main_list"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:divider="@color/dividerColor"
+        android:divider="@color/divider"
         android:dividerHeight="1dp" />
 
 </LinearLayout>
