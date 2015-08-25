@@ -12,4 +12,5 @@
     <string name="pref_title_ndays">Future days</string>
     <string name="pref_title_pdays">Past days</string>
     <string name="pref_summary_pdays">Number of days past</string>
+    <string name="msg_notif">Se actualizaron resultados de los partidos</string>
 </resources>

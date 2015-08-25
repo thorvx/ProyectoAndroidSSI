@@ -1,8 +1,13 @@
 package com.salamancasolutions.footballnews;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
@@ -19,6 +24,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.salamancasolutions.footballnews.Service.MatchsResultsService;
 import com.salamancasolutions.footballnews.data.FootballNewsDbHelper;
 import com.salamancasolutions.footballnews.data.MatchColumns;
 
@@ -41,6 +47,9 @@ public class MainActivity extends ActionBarActivity {
     private static final String LOG_TAG = Utility.class.getSimpleName();
     private String teamId;
     private DateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+    private int futureDays = 0;
+    private int pastDays = 0;
+    private ServiceReceiver receiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,12 +75,40 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
+
+        refreshResults();
+        loadResultsList();
+
+        IntentFilter filter = new IntentFilter(ServiceReceiver.PROCESS_RESPONSE);
+        filter.addCategory(Intent.CATEGORY_DEFAULT);
+        receiver = new ServiceReceiver();
+        registerReceiver(receiver, filter);
+
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        refreshResults();
+        //refreshResults();
+    }
+
+    @Override
+    public void onDestroy() {
+        this.unregisterReceiver(receiver);
+        super.onDestroy();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        String newTeamId = prefs.getString("favorite_team", "81");
+        int newFutureDays = Integer.parseInt(prefs.getString("next_days", "10"));
+        int newPastDays = Integer.parseInt(prefs.getString("past_days", "10"));
+
+        if(!teamId.equalsIgnoreCase(newTeamId) || newFutureDays!= futureDays || newPastDays!=pastDays){
+            refreshResults();
+        }
     }
 
     @Override
@@ -84,8 +121,8 @@ public class MainActivity extends ActionBarActivity {
     public void refreshResults(){
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         teamId = prefs.getString("favorite_team", "81");
-        int futureDays = Integer.parseInt(prefs.getString("next_days", "10"));
-        int pastDays = Integer.parseInt(prefs.getString("past_days", "10"));
+        futureDays = Integer.parseInt(prefs.getString("next_days", "10"));
+        pastDays = Integer.parseInt(prefs.getString("past_days", "10"));
 
         Date today = new Date();
         Calendar cal = new GregorianCalendar();
@@ -96,10 +133,16 @@ public class MainActivity extends ActionBarActivity {
         cal.add(Calendar.DAY_OF_MONTH, pastDays * -1);
         Date pastDay = cal.getTime();
 
-        loadResultsList(teamId);
         DateFormat dfapi = new SimpleDateFormat("yyyy-MM-dd");
-        GetResultTask task = new GetResultTask();
-        task.execute(teamId, dfapi.format(pastDay), dfapi.format(futureDay));
+
+/*        GetResultTask task = new GetResultTask();
+        task.execute(teamId, dfapi.format(pastDay), dfapi.format(futureDay));*/
+
+        Intent serviceIntent = new Intent(this, MatchsResultsService.class);
+        serviceIntent.putExtra(MatchsResultsService.TEAM_ID, teamId);
+        serviceIntent.putExtra(MatchsResultsService.START_DATE, dfapi.format(pastDay));
+        serviceIntent.putExtra(MatchsResultsService.END_DATE, dfapi.format(futureDay));
+        startService(serviceIntent);
 
     }
 
@@ -125,7 +168,7 @@ public class MainActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    class GetResultTask extends AsyncTask<String, Void, ArrayList<Match>> {
+/*    class GetResultTask extends AsyncTask<String, Void, ArrayList<Match>> {
 
         @Override
         protected ArrayList<Match> doInBackground(String... params) {
@@ -276,9 +319,9 @@ public class MainActivity extends ActionBarActivity {
             return false;
         }
 
-    }
+    }*/
 
-    public void loadResultsList(String teamId){
+    public void loadResultsList(){
 
         mainListAdapter.clear();
         mainList.invalidate();
@@ -291,11 +334,10 @@ public class MainActivity extends ActionBarActivity {
                 null);
 
         while (cursor.moveToNext()) {
-
             mainListAdapter.add(new Match(cursor.getString(1), 0, cursor.getString(2), cursor.getString(4), cursor.getString(3), cursor.getString(5), 0, toFormatedDate(cursor.getString(6)), cursor.getString(7)));
-
         }
 
+        cursor.close();
     }
 
     public Date toFormatedDate(String s){
@@ -308,5 +350,25 @@ public class MainActivity extends ActionBarActivity {
         }
         return res;
     }
+
+    public class ServiceReceiver extends BroadcastReceiver {
+
+        public static final String PROCESS_RESPONSE = "com.salamancasolutions.footballnews.service.action.PROCESS_RESPONSE";
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.v(LOG_TAG, "Service finished event received");
+            String reponseStatus = intent.getStringExtra(MatchsResultsService.RESPONSE_STATUS);
+            if(reponseStatus.equalsIgnoreCase(MatchsResultsService.RESPONSE_STATUS_OK)){
+                loadResultsList();
+            } else if (reponseStatus.equalsIgnoreCase(MatchsResultsService.RESPONSE_STATUS_NOK)){
+                Toast.makeText(getBaseContext(), getBaseContext().getResources().getString(R.string.error_get_results), Toast.LENGTH_SHORT).show();
+            }
+
+        }
+
+    }
+
+
 
 }
